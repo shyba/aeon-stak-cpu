@@ -354,13 +354,16 @@ void cryptonight_hash(const void* input, size_t len, void* output, cryptonight_c
 // to fit temporary vars for two contexts. Function will read len*2 from input and write 64 bytes to output
 // We are still limited by L3 cache, so doubling will only work with CPUs where we have more than 2MB to core (Xeons)
 template<size_t ITERATIONS, size_t MEM, bool SOFT_AES, bool PREFETCH>
-void cryptonight_double_hash(const void* input, size_t len, void* output, cryptonight_ctx* __restrict ctx0, cryptonight_ctx* __restrict ctx1, cryptonight_ctx* __restrict ctx2, cryptonight_ctx* __restrict ctx3, cryptonight_ctx* __restrict ctx4)
+void cryptonight_double_hash(const void* input, size_t len, void* output, cryptonight_ctx* __restrict ctx0, cryptonight_ctx* __restrict ctx1, cryptonight_ctx* __restrict ctx2, cryptonight_ctx* __restrict ctx3, cryptonight_ctx* __restrict ctx4, cryptonight_ctx* __restrict ctx5, cryptonight_ctx* __restrict ctx6, cryptonight_ctx* __restrict ctx7)
 {
 	keccak((const uint8_t *)input, len, ctx0->hash_state, 200);
 	keccak((const uint8_t *)input+len, len, ctx1->hash_state, 200);
 	keccak((const uint8_t *)input+(2*len), len, ctx2->hash_state, 200);
 	keccak((const uint8_t *)input+(3*len), len, ctx3->hash_state, 200);
 	keccak((const uint8_t *)input+(4*len), len, ctx4->hash_state, 200);
+	keccak((const uint8_t *)input+(5*len), len, ctx5->hash_state, 200);
+	keccak((const uint8_t *)input+(6*len), len, ctx6->hash_state, 200);
+	keccak((const uint8_t *)input+(7*len), len, ctx7->hash_state, 200);
 
 	// Optim - 99% time boundary
 	cn_explode_scratchpad<MEM, SOFT_AES, PREFETCH>((__m128i*)ctx0->hash_state, (__m128i*)ctx0->long_state);
@@ -368,6 +371,9 @@ void cryptonight_double_hash(const void* input, size_t len, void* output, crypto
 	cn_explode_scratchpad<MEM, SOFT_AES, PREFETCH>((__m128i*)ctx2->hash_state, (__m128i*)ctx2->long_state);
 	cn_explode_scratchpad<MEM, SOFT_AES, PREFETCH>((__m128i*)ctx3->hash_state, (__m128i*)ctx3->long_state);
 	cn_explode_scratchpad<MEM, SOFT_AES, PREFETCH>((__m128i*)ctx4->hash_state, (__m128i*)ctx4->long_state);
+	cn_explode_scratchpad<MEM, SOFT_AES, PREFETCH>((__m128i*)ctx5->hash_state, (__m128i*)ctx5->long_state);
+	cn_explode_scratchpad<MEM, SOFT_AES, PREFETCH>((__m128i*)ctx6->hash_state, (__m128i*)ctx6->long_state);
+	cn_explode_scratchpad<MEM, SOFT_AES, PREFETCH>((__m128i*)ctx7->hash_state, (__m128i*)ctx7->long_state);
 
 	uint8_t* l0 = ctx0->long_state;
 	uint64_t* h0 = (uint64_t*)ctx0->hash_state;
@@ -379,6 +385,12 @@ void cryptonight_double_hash(const void* input, size_t len, void* output, crypto
 	uint64_t* h3 = (uint64_t*)ctx3->hash_state;
 	uint8_t* l4 = ctx4->long_state;
 	uint64_t* h4 = (uint64_t*)ctx4->hash_state;
+	uint8_t* l5 = ctx5->long_state;
+	uint64_t* h5 = (uint64_t*)ctx5->hash_state;
+	uint8_t* l6 = ctx6->long_state;
+	uint64_t* h6 = (uint64_t*)ctx6->hash_state;
+	uint8_t* l7 = ctx7->long_state;
+	uint64_t* h7 = (uint64_t*)ctx7->hash_state;
 
 	uint64_t axl0 = h0[0] ^ h0[4];
 	uint64_t axh0 = h0[1] ^ h0[5];
@@ -392,12 +404,21 @@ void cryptonight_double_hash(const void* input, size_t len, void* output, crypto
 	__m128i bx3 = _mm_set_epi64x(h3[3] ^ h3[7], h3[2] ^ h3[6]);
 	__m128i ax4 = _mm_set_epi64x(h4[1] ^ h4[5], h4[0] ^ h4[4]);
 	__m128i bx4 = _mm_set_epi64x(h4[3] ^ h4[7], h4[2] ^ h4[6]);
+	__m128i ax5 = _mm_set_epi64x(h5[1] ^ h5[5], h5[0] ^ h5[4]);
+	__m128i bx5 = _mm_set_epi64x(h5[3] ^ h5[7], h5[2] ^ h5[6]);
+	__m128i ax6 = _mm_set_epi64x(h6[1] ^ h6[5], h6[0] ^ h6[4]);
+	__m128i bx6 = _mm_set_epi64x(h6[3] ^ h6[7], h6[2] ^ h6[6]);
+	__m128i ax7 = _mm_set_epi64x(h7[1] ^ h7[5], h7[0] ^ h7[4]);
+	__m128i bx7 = _mm_set_epi64x(h7[3] ^ h7[7], h7[2] ^ h7[6]);
 
 	uint64_t idx0 = h0[0] ^ h0[4];
 	uint64_t idx1 = h1[0] ^ h1[4];
 	uint64_t idx2 = h2[0] ^ h2[4];
 	uint64_t idx3 = h3[0] ^ h3[4];
 	uint64_t idx4 = h4[0] ^ h4[4];
+	uint64_t idx5 = h5[0] ^ h5[4];
+	uint64_t idx6 = h6[0] ^ h6[4];
+	uint64_t idx7 = h7[0] ^ h7[4];
 
 	// Optim - 90% time boundary
 	for (size_t i = 0; i < ITERATIONS; i++)
@@ -437,6 +458,27 @@ void cryptonight_double_hash(const void* input, size_t len, void* output, crypto
 		idx4 = _mm_cvtsi128_si64(cx);
 		bx4 = cx;
 		_mm_prefetch((const char*)&l4[idx4 & 0x1FFFF0], _MM_HINT_T1);
+
+		cx = _mm_load_si128((__m128i *)&l5[idx5 & 0x1FFFF0]);
+		cx = _mm_aesenc_si128(cx, ax5);
+		_mm_store_si128((__m128i *)&l5[idx5 & 0x1FFFF0], _mm_xor_si128(bx5, cx));
+		idx5 = _mm_cvtsi128_si64(cx);
+		bx5 = cx;
+		_mm_prefetch((const char*)&l5[idx5 & 0x1FFFF0], _MM_HINT_T1);
+
+		cx = _mm_load_si128((__m128i *)&l6[idx6 & 0x1FFFF0]);
+		cx = _mm_aesenc_si128(cx, ax6);
+		_mm_store_si128((__m128i *)&l6[idx6 & 0x1FFFF0], _mm_xor_si128(bx6, cx));
+		idx6 = _mm_cvtsi128_si64(cx);
+		bx6 = cx;
+		_mm_prefetch((const char*)&l6[idx6 & 0x1FFFF0], _MM_HINT_T1);
+
+		cx = _mm_load_si128((__m128i *)&l7[idx7 & 0x1FFFF0]);
+		cx = _mm_aesenc_si128(cx, ax7);
+		_mm_store_si128((__m128i *)&l7[idx7 & 0x1FFFF0], _mm_xor_si128(bx7, cx));
+		idx7 = _mm_cvtsi128_si64(cx);
+		bx7 = cx;
+		_mm_prefetch((const char*)&l7[idx7 & 0x1FFFF0], _MM_HINT_T1);
 
 		uint64_t hi, lo;
 		cx = _mm_load_si128((__m128i *)&l0[idx0 & 0x1FFFF0]);
@@ -478,6 +520,30 @@ void cryptonight_double_hash(const void* input, size_t len, void* output, crypto
 		ax4 = _mm_xor_si128(ax4, cx);
 		idx4 = _mm_cvtsi128_si64(ax4);
 		_mm_prefetch((const char*)&l4[idx4 & 0x1FFFF0], _MM_HINT_T1);
+
+		cx = _mm_load_si128((__m128i *)&l5[idx5 & 0x1FFFF0]);
+		lo = _umul128(idx5, _mm_cvtsi128_si64(cx), &hi);
+		ax5 = _mm_add_epi64(ax5, _mm_set_epi64x(lo, hi));
+		_mm_store_si128((__m128i*)&l5[idx5 & 0x1FFFF0], ax5);
+		ax5 = _mm_xor_si128(ax5, cx);
+		idx5 = _mm_cvtsi128_si64(ax5);
+		_mm_prefetch((const char*)&l5[idx5 & 0x1FFFF0], _MM_HINT_T1);
+
+		cx = _mm_load_si128((__m128i *)&l6[idx6 & 0x1FFFF0]);
+		lo = _umul128(idx6, _mm_cvtsi128_si64(cx), &hi);
+		ax6 = _mm_add_epi64(ax6, _mm_set_epi64x(lo, hi));
+		_mm_store_si128((__m128i*)&l6[idx6 & 0x1FFFF0], ax6);
+		ax6 = _mm_xor_si128(ax6, cx);
+		idx6 = _mm_cvtsi128_si64(ax6);
+		_mm_prefetch((const char*)&l6[idx6 & 0x1FFFF0], _MM_HINT_T1);
+
+		cx = _mm_load_si128((__m128i *)&l7[idx7 & 0x1FFFF0]);
+		lo = _umul128(idx7, _mm_cvtsi128_si64(cx), &hi);
+		ax7 = _mm_add_epi64(ax7, _mm_set_epi64x(lo, hi));
+		_mm_store_si128((__m128i*)&l7[idx7 & 0x1FFFF0], ax7);
+		ax7 = _mm_xor_si128(ax7, cx);
+		idx7 = _mm_cvtsi128_si64(ax7);
+		_mm_prefetch((const char*)&l7[idx7 & 0x1FFFF0], _MM_HINT_T1);
 	}
 
 	// Optim - 90% time boundary
@@ -486,6 +552,9 @@ void cryptonight_double_hash(const void* input, size_t len, void* output, crypto
 	cn_implode_scratchpad<MEM, SOFT_AES, PREFETCH>((__m128i*)ctx2->long_state, (__m128i*)ctx2->hash_state);
 	cn_implode_scratchpad<MEM, SOFT_AES, PREFETCH>((__m128i*)ctx3->long_state, (__m128i*)ctx3->hash_state);
 	cn_implode_scratchpad<MEM, SOFT_AES, PREFETCH>((__m128i*)ctx4->long_state, (__m128i*)ctx4->hash_state);
+	cn_implode_scratchpad<MEM, SOFT_AES, PREFETCH>((__m128i*)ctx5->long_state, (__m128i*)ctx5->hash_state);
+	cn_implode_scratchpad<MEM, SOFT_AES, PREFETCH>((__m128i*)ctx6->long_state, (__m128i*)ctx6->hash_state);
+	cn_implode_scratchpad<MEM, SOFT_AES, PREFETCH>((__m128i*)ctx7->long_state, (__m128i*)ctx7->hash_state);
 
 	// Optim - 99% time boundary
 
@@ -499,4 +568,10 @@ void cryptonight_double_hash(const void* input, size_t len, void* output, crypto
 	extra_hashes[ctx3->hash_state[0] & 3](ctx3->hash_state, 200, (char*)output + 32*3);
 	keccakf((uint64_t*)ctx4->hash_state, 24);
 	extra_hashes[ctx4->hash_state[0] & 3](ctx4->hash_state, 200, (char*)output + 32*4);
+	keccakf((uint64_t*)ctx5->hash_state, 24);
+	extra_hashes[ctx5->hash_state[0] & 3](ctx5->hash_state, 200, (char*)output + 32*5);
+	keccakf((uint64_t*)ctx6->hash_state, 24);
+	extra_hashes[ctx6->hash_state[0] & 3](ctx6->hash_state, 200, (char*)output + 32*6);
+	keccakf((uint64_t*)ctx7->hash_state, 24);
+	extra_hashes[ctx7->hash_state[0] & 3](ctx7->hash_state, 200, (char*)output + 32*7);
 }
