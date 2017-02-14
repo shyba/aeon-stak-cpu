@@ -246,7 +246,7 @@ bool minethd::self_test()
 	if(res == 0 && fatal)
 		return false;
 
-	cryptonight_ctx *ctx0, *ctx1, *ctx2;
+	cryptonight_ctx *ctx0, *ctx1, *ctx2, *ctx3;
 	if((ctx0 = minethd_alloc_ctx()) == nullptr)
 		return false;
 
@@ -261,8 +261,15 @@ bool minethd::self_test()
 		cryptonight_free_ctx(ctx1);
 		return false;
 	}
+	if((ctx3 = minethd_alloc_ctx()) == nullptr)
+	{
+		cryptonight_free_ctx(ctx0);
+		cryptonight_free_ctx(ctx1);
+		cryptonight_free_ctx(ctx2);
+		return false;
+	}
 
-	unsigned char out[96];
+	unsigned char out[32*4];
 	bool bResult;
 
 	cn_hash_fun hashf;
@@ -289,6 +296,7 @@ bool minethd::self_test()
 	cryptonight_free_ctx(ctx0);
 	cryptonight_free_ctx(ctx1);
 	cryptonight_free_ctx(ctx2);
+	cryptonight_free_ctx(ctx3);
 
 	if(!bResult)
 		printer::inst()->print_msg(L0,
@@ -478,11 +486,12 @@ void minethd::double_work_main()
 	cryptonight_ctx* ctx0;
 	cryptonight_ctx* ctx1;
 	cryptonight_ctx* ctx2;
+	cryptonight_ctx* ctx3;
 	uint64_t iCount = 0;
-	uint64_t *piHashVal0, *piHashVal1, *piHashVal2;
-	uint32_t *piNonce0, *piNonce1, *piNonce2;
-	uint8_t bDoubleHashOut[96];
-	uint8_t	bDoubleWorkBlob[sizeof(miner_work::bWorkBlob) * 3];
+	uint64_t *piHashVal0, *piHashVal1, *piHashVal2, *piHashVal3;
+	uint32_t *piNonce0, *piNonce1, *piNonce2, *piNonce3;
+	uint8_t bDoubleHashOut[32*4];
+	uint8_t	bDoubleWorkBlob[sizeof(miner_work::bWorkBlob) * 4];
 	uint32_t iNonce;
 	job_result res;
 
@@ -490,10 +499,12 @@ void minethd::double_work_main()
 	ctx0 = minethd_alloc_ctx();
 	ctx1 = minethd_alloc_ctx();
 	ctx2 = minethd_alloc_ctx();
+	ctx3 = minethd_alloc_ctx();
 
 	piHashVal0 = (uint64_t*)(bDoubleHashOut + 24);
 	piHashVal1 = (uint64_t*)(bDoubleHashOut + 32 + 24);
-	piHashVal2 = (uint64_t*)(bDoubleHashOut + 64 + 24);
+	piHashVal2 = (uint64_t*)(bDoubleHashOut + 32*2 + 24);
+	piHashVal3 = (uint64_t*)(bDoubleHashOut + 32*3 + 24);
 	piNonce0 = (uint32_t*)(bDoubleWorkBlob + 39);
 	piNonce1 = nullptr;
 	piNonce2 = nullptr;
@@ -515,8 +526,10 @@ void minethd::double_work_main()
 			memcpy(bDoubleWorkBlob, oWork.bWorkBlob, oWork.iWorkSize);
 			memcpy(bDoubleWorkBlob + oWork.iWorkSize, oWork.bWorkBlob, oWork.iWorkSize);
 			memcpy(bDoubleWorkBlob + 2*oWork.iWorkSize, oWork.bWorkBlob, oWork.iWorkSize);
+			memcpy(bDoubleWorkBlob + 3*oWork.iWorkSize, oWork.bWorkBlob, oWork.iWorkSize);
 			piNonce1 = (uint32_t*)(bDoubleWorkBlob + oWork.iWorkSize + 39);
 			piNonce2 = (uint32_t*)(bDoubleWorkBlob + 2*oWork.iWorkSize + 39);
+			piNonce3 = (uint32_t*)(bDoubleWorkBlob + 3*oWork.iWorkSize + 39);
 			continue;
 		}
 
@@ -537,21 +550,23 @@ void minethd::double_work_main()
 				iTimestamp.store(iStamp, std::memory_order_relaxed);
 			}
 
-			iCount += 3;
+			iCount += 4;
 
 			*piNonce0 = ++iNonce;
 			*piNonce1 = ++iNonce;
 			*piNonce2 = ++iNonce;
-
-			hash_fun(bDoubleWorkBlob, oWork.iWorkSize, bDoubleHashOut, ctx0, ctx1, ctx2);
+			*piNonce3 = ++iNonce;
+			hash_fun(bDoubleWorkBlob, oWork.iWorkSize, bDoubleHashOut, ctx0, ctx1, ctx2, ctx3);
 
 			if (*piHashVal0 < oWork.iTarget)
-				executor::inst()->push_event(ex_event(job_result(oWork.sJobID, iNonce-2, bDoubleHashOut), oWork.iPoolId));
+				executor::inst()->push_event(ex_event(job_result(oWork.sJobID, iNonce-3, bDoubleHashOut), oWork.iPoolId));
 
 			if (*piHashVal1 < oWork.iTarget)
-				executor::inst()->push_event(ex_event(job_result(oWork.sJobID, iNonce-1, bDoubleHashOut + 32), oWork.iPoolId));
+				executor::inst()->push_event(ex_event(job_result(oWork.sJobID, iNonce-2, bDoubleHashOut + 32), oWork.iPoolId));
 			if (*piHashVal2 < oWork.iTarget)
-				executor::inst()->push_event(ex_event(job_result(oWork.sJobID, iNonce, bDoubleHashOut + 64), oWork.iPoolId));
+				executor::inst()->push_event(ex_event(job_result(oWork.sJobID, iNonce-1, bDoubleHashOut + 32*2), oWork.iPoolId));
+			if (*piHashVal3 < oWork.iTarget)
+				executor::inst()->push_event(ex_event(job_result(oWork.sJobID, iNonce-0, bDoubleHashOut + 32*3), oWork.iPoolId));
 
 			std::this_thread::yield();
 		}
@@ -560,11 +575,14 @@ void minethd::double_work_main()
 		memcpy(bDoubleWorkBlob, oWork.bWorkBlob, oWork.iWorkSize);
 		memcpy(bDoubleWorkBlob + oWork.iWorkSize, oWork.bWorkBlob, oWork.iWorkSize);
 		memcpy(bDoubleWorkBlob + 2*oWork.iWorkSize, oWork.bWorkBlob, oWork.iWorkSize);
+		memcpy(bDoubleWorkBlob + 3*oWork.iWorkSize, oWork.bWorkBlob, oWork.iWorkSize);
 		piNonce1 = (uint32_t*)(bDoubleWorkBlob + oWork.iWorkSize + 39);
 		piNonce2 = (uint32_t*)(bDoubleWorkBlob + 2*oWork.iWorkSize + 39);
+		piNonce3 = (uint32_t*)(bDoubleWorkBlob + 3*oWork.iWorkSize + 39);
 	}
 
 	cryptonight_free_ctx(ctx0);
 	cryptonight_free_ctx(ctx1);
 	cryptonight_free_ctx(ctx2);
+	cryptonight_free_ctx(ctx3);
 }
