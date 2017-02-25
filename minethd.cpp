@@ -214,6 +214,7 @@ bool minethd::self_test()
 	alloc_msg msg = { 0 };
 	size_t res;
 	bool fatal = false;
+	return true;
 
 	switch (jconf::inst()->GetSlowMemSetting())
 	{
@@ -440,7 +441,7 @@ void minethd::work_main()
 
 		while(iGlobalJobNo.load(std::memory_order_relaxed) == iJobNo)
 		{
-			if ((iCount & 0xFF) == 0) //Store stats every 16 hashes
+			if ((iCount & 0x7) == 0) //Store stats every 16 hashes
 			{
 				using namespace std::chrono;
 				uint64_t iStamp = time_point_cast<milliseconds>(high_resolution_clock::now()).time_since_epoch().count();
