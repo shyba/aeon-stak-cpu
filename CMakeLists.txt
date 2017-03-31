@@ -65,6 +65,7 @@ if(MICROHTTPD_ENABLE)
     find_library(MHTD
         NAMES
             microhttpd
+            libmicrohttpd-dll
             libmicrohttpd.lib
         PATHS
             ENV "MICROHTTPD_ROOT"
