@@ -64,8 +64,11 @@ Performance is nearly identical to the closed source paid miners. Here are some 
 
 * **I7-2600K** - 266 H/s
 * **I7-6700** - 276 H/s (with a separate GPU miner)
+* **I7-4790** - 1330 H/s ( 8 Threads 3.60ghz )
 * **Dual X5650** - 466 H/s (depends on NUMA)
 * **Dual E5640** - 365 H/s (same as above)
+* **E3-1245** - 810 H/s ( 8 Threads 3.30ghz )
+* **Dual E5-2665** - 3025H/s ( 32 Threads 2.40ghz )
 
 #### Default dev donation
 By default the miner will donate 1% of the hashpower (1 minute in 100 minutes) to my pool. If you want to change that, edit **donate-level.h** before you build the binaries.
