@@ -493,7 +493,7 @@ void minethd::double_work_main()
 		pin_thd_affinity();
 
 	cn_hash_fun_dbl hash_fun;
-	int hashes = 2;
+	const int hashes = 2;
 	cryptonight_ctx* ctx[hashes];
 	uint64_t iCount = 0;
 	uint64_t *piHashVal[hashes];
