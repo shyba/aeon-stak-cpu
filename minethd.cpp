@@ -493,18 +493,18 @@ void minethd::double_work_main()
 		pin_thd_affinity();
 
 	cn_hash_fun_dbl hash_fun;
-	int SIZE = 2;
-	cryptonight_ctx* ctx[SIZE];
+	int hashes = 2;
+	cryptonight_ctx* ctx[hashes];
 	uint64_t iCount = 0;
-	uint64_t *piHashVal[SIZE];
-	uint32_t *piNonce[SIZE];
-	uint8_t bDoubleHashOut[32*SIZE];
+	uint64_t *piHashVal[hashes];
+	uint32_t *piNonce[hashes];
+	uint8_t bDoubleHashOut[32*hashes];
 	uint8_t	bDoubleWorkBlob[sizeof(miner_work::bWorkBlob) * 5];
 	uint32_t iNonce;
 	job_result res;
 
 	hash_fun = func_dbl_selector(jconf::inst()->HaveHardwareAes(), bNoPrefetch);
-	for(int i=0; i<SIZE; i++){
+	for(int i=0; i<hashes; i++){
 		ctx[i] = minethd_alloc_ctx();
 		piHashVal[i] = (uint64_t*)(bDoubleHashOut + (32*i) + 24);
 		piNonce[i] = nullptr;
@@ -525,7 +525,7 @@ void minethd::double_work_main()
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 			consume_work();
-			for(int i=0; i<SIZE; i++){
+			for(int i=0; i<hashes; i++){
 				memcpy(bDoubleWorkBlob + i*oWork.iWorkSize, oWork.bWorkBlob, oWork.iWorkSize);
 				piNonce[i] = (uint32_t*)(bDoubleWorkBlob + i*oWork.iWorkSize + 39);
 			}
@@ -549,27 +549,27 @@ void minethd::double_work_main()
 				iTimestamp.store(iStamp, std::memory_order_relaxed);
 			}
 
-			iCount += SIZE;
+			iCount += hashes;
 
-			for(int i=0; i<SIZE; i++)
+			for(int i=0; i<hashes; i++)
 				*piNonce[i] = ++iNonce;
-			hash_fun(bDoubleWorkBlob, oWork.iWorkSize, bDoubleHashOut, ctx, SIZE);
+			hash_fun(bDoubleWorkBlob, oWork.iWorkSize, bDoubleHashOut, ctx, hashes);
 
-			for(int i=0;i<SIZE;i++){
+			for(int i=0;i<hashes;i++){
 				if (*piHashVal[i] < oWork.iTarget)
-					executor::inst()->push_event(ex_event(job_result(oWork.sJobID, iNonce-(SIZE-i-1), bDoubleHashOut + 32*i), oWork.iPoolId));
+					executor::inst()->push_event(ex_event(job_result(oWork.sJobID, iNonce-(hashes-i-1), bDoubleHashOut + 32*i), oWork.iPoolId));
 			}
 
 			std::this_thread::yield();
 		}
 
 		consume_work();
-		for(int i=0; i<SIZE; i++){
+		for(int i=0; i<hashes; i++){
 			memcpy(bDoubleWorkBlob + i*oWork.iWorkSize, oWork.bWorkBlob, oWork.iWorkSize);
 			if(i>0) {piNonce[i] = (uint32_t*)(bDoubleWorkBlob + i*oWork.iWorkSize + 39);}
 		}
 	}
 
-	for(int i=0; i<SIZE; i++)
+	for(int i=0; i<hashes; i++)
 		cryptonight_free_ctx(ctx[i]);
 }

@@ -12,7 +12,7 @@ extern "C" {
 
 typedef struct {
 	uint8_t hash_state[224]; // Need only 200, explicit align
-	uint8_t* long_state __attribute__ ((aligned (4096)));
+	uint8_t* long_state;
 	uint8_t ctx_info[24]; //Use some of the extra memory for flags
 } cryptonight_ctx;
 
