@@ -27,15 +27,6 @@ static inline uint64_t _umul128(uint64_t a, uint64_t b, uint64_t* hi)
 	*hi = r >> 64;
 	return (uint64_t)r;
 }
-static inline void _umul128_sum(uint64_t a, uint64_t b, __m128i* ax)
-{
-	uint64_t hi, lo;
-	unsigned __int128 r = (unsigned __int128)a * (unsigned __int128)b;
-	hi = r >> 64;
-	lo = (uint64_t)r;
-	*ax = _mm_add_epi64(*ax, _mm_set_epi64x(lo, hi));
-}
-
 #define _mm256_set_m128i(v0, v1)  _mm256_insertf128_si256(_mm256_castsi128_si256(v1), (v0), 1)
 #else
 #include <intrin.h>
@@ -395,7 +386,9 @@ void cryptonight_double_hash(const void* input, size_t len, void* output, crypto
 		}
 		for(int i = 0; i<hashes; i++){
 			cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 0xFFFF0]);
-			_umul128_sum(idx[i], _mm_cvtsi128_si64(cx[i]), &ax[i]);
+			uint64_t hi, lo;
+			lo = _umul128(idx[i], _mm_cvtsi128_si64(cx[i]), &hi);
+			ax[i] = _mm_add_epi64(ax[i], _mm_set_epi64x(lo, hi));
 			_mm_store_si128((__m128i*)&l[i][idx[i] & 0xFFFF0], ax[i]);
 			ax[i] = _mm_xor_si128(ax[i], cx[i]);
 			idx[i] = _mm_cvtsi128_si64(ax[i]);
