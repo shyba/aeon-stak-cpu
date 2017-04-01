@@ -293,12 +293,12 @@ bool minethd::self_test()
 
 	cryptonight_ctx* ctx[8] = {ctx0, ctx1, ctx2, ctx3, ctx4, ctx4, ctx4, ctx4};
 	hashdf = func_dbl_selector(jconf::inst()->HaveHardwareAes(), false);
-	hashdf("The quick brown fox jumps over the lazy dogThe quick brown fox jumps over the lazy log", 43, out, ctx, 8);
+	hashdf("The quick brown fox jumps over the lazy dogThe quick brown fox jumps over the lazy log", 43, out, ctx);
 	bResult &= memcmp(out, "\x3e\xbb\x7f\x9f\x7d\x27\x3d\x7c\x31\x8d\x86\x94\x77\x55\x0c\xc8\x00\xcf\xb1\x1b\x0c\xad\xb7\xff\xbd\xf6\xf8\x9f\x3a\x47\x1c\x59"
 		                   "\xb4\x77\xd5\x02\xe4\xd8\x48\x7f\x42\xdf\xe3\x8e\xed\x73\x81\x7a\xda\x91\xb7\xe2\x63\xd2\x91\x71\xb6\x5c\x44\x3a\x01\x2a\x41\x22", 64) == 0;
 
 	hashdf = func_dbl_selector(jconf::inst()->HaveHardwareAes(), true);
-	hashdf("The quick brown fox jumps over the lazy dogThe quick brown fox jumps over the lazy log", 43, out, ctx, 8);
+	hashdf("The quick brown fox jumps over the lazy dogThe quick brown fox jumps over the lazy log", 43, out, ctx);
 	bResult &= memcmp(out, "\x3e\xbb\x7f\x9f\x7d\x27\x3d\x7c\x31\x8d\x86\x94\x77\x55\x0c\xc8\x00\xcf\xb1\x1b\x0c\xad\xb7\xff\xbd\xf6\xf8\x9f\x3a\x47\x1c\x59"
 		                   "\xb4\x77\xd5\x02\xe4\xd8\x48\x7f\x42\xdf\xe3\x8e\xed\x73\x81\x7a\xda\x91\xb7\xe2\x63\xd2\x91\x71\xb6\x5c\x44\x3a\x01\x2a\x41\x22", 64) == 0;
 
@@ -493,7 +493,8 @@ void minethd::double_work_main()
 		pin_thd_affinity();
 
 	cn_hash_fun_dbl hash_fun;
-	const int hashes = 2;
+	// remember to also change in crypto/cryptonight_aesni.h
+	static const int hashes = 2;
 	cryptonight_ctx* ctx[hashes];
 	uint64_t iCount = 0;
 	uint64_t *piHashVal[hashes];
@@ -553,7 +554,7 @@ void minethd::double_work_main()
 
 			for(int i=0; i<hashes; i++)
 				*piNonce[i] = ++iNonce;
-			hash_fun(bDoubleWorkBlob, oWork.iWorkSize, bDoubleHashOut, ctx, hashes);
+			hash_fun(bDoubleWorkBlob, oWork.iWorkSize, bDoubleHashOut, ctx);
 
 			for(int i=0;i<hashes;i++){
 				if (*piHashVal[i] < oWork.iTarget)

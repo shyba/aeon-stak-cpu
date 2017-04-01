@@ -362,8 +362,9 @@ void cryptonight_hash(const void* input, size_t len, void* output, cryptonight_c
 // to fit temporary vars for two contexts. Function will read len*2 from input and write 64 bytes to output
 // We are still limited by L3 cache, so doubling will only work with CPUs where we have more than 2MB to core (Xeons)
 template<size_t ITERATIONS, size_t MEM, bool SOFT_AES, bool PREFETCH>
-void cryptonight_double_hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx, const int hashes)
+void cryptonight_double_hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx)
 {
+	static const int hashes = 2;
 	for(int i = 0; i<hashes; i++){
 		keccak((const uint8_t *)input+(i*len), len, ctx[i]->hash_state, 200);
 		cn_explode_scratchpad<MEM, SOFT_AES, PREFETCH>((__m128i*)ctx[i]->hash_state, (__m128i*)ctx[i]->long_state);
