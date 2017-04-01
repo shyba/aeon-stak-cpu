@@ -362,17 +362,17 @@ void cryptonight_hash(const void* input, size_t len, void* output, cryptonight_c
 // to fit temporary vars for two contexts. Function will read len*2 from input and write 64 bytes to output
 // We are still limited by L3 cache, so doubling will only work with CPUs where we have more than 2MB to core (Xeons)
 template<size_t ITERATIONS, size_t MEM, bool SOFT_AES, bool PREFETCH>
-void cryptonight_double_hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx, int SIZE)
+void cryptonight_double_hash(const void* input, size_t len, void* output, cryptonight_ctx** ctx, int hashes)
 {
-	for(int i = 0; i<SIZE; i++){
+	for(int i = 0; i<hashes; i++){
 		keccak((const uint8_t *)input+(i*len), len, ctx[i]->hash_state, 200);
 		cn_explode_scratchpad<MEM, SOFT_AES, PREFETCH>((__m128i*)ctx[i]->hash_state, (__m128i*)ctx[i]->long_state);
 	}
 
-	uint8_t* l[SIZE];
-	uint64_t* h[SIZE], idx[SIZE];
-	__m128i ax[SIZE], bx[SIZE], cx[SIZE];
-	for(int i = 0; i<SIZE; i++){
+	uint8_t* l[hashes];
+	uint64_t* h[hashes], idx[hashes];
+	__m128i ax[hashes], bx[hashes], cx[hashes];
+	for(int i = 0; i<hashes; i++){
 		l[i] = ctx[i]->long_state;
 		h[i] = (uint64_t*)ctx[i]->hash_state;
 		ax[i] = _mm_set_epi64x(h[i][1] ^ h[i][5], h[i][0] ^ h[i][4]);
@@ -384,7 +384,7 @@ void cryptonight_double_hash(const void* input, size_t len, void* output, crypto
 	// Optim - 90% time boundary
 	for (size_t x = 0; x < ITERATIONS; x++)
 	{
-		for(int i = 0; i<SIZE; i++){
+		for(int i = 0; i<hashes; i++){
 			cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 0xFFFF0]);
 			cx[i] = _mm_aesenc_si128(cx[i], ax[i]);
 			_mm_store_si128((__m128i *)&l[i][idx[i] & 0xFFFF0], _mm_xor_si128(bx[i], cx[i]));
@@ -392,7 +392,7 @@ void cryptonight_double_hash(const void* input, size_t len, void* output, crypto
 			_mm_prefetch((const char*)&l[i][idx[i] & 0xFFFF0], _MM_HINT_T0);
 			bx[i] = cx[i];
 		}
-		for(int i = 0; i<SIZE; i++){
+		for(int i = 0; i<hashes; i++){
 			cx[i] = _mm_load_si128((__m128i *)&l[i][idx[i] & 0xFFFF0]);
 			_umul128_sum(idx[i], _mm_cvtsi128_si64(cx[i]), &ax[i]);
 			_mm_store_si128((__m128i*)&l[i][idx[i] & 0xFFFF0], ax[i]);
@@ -404,7 +404,7 @@ void cryptonight_double_hash(const void* input, size_t len, void* output, crypto
 	}
 
 	// Optim - 90% time boundary
-	for(int i = 0; i<SIZE; i++){
+	for(int i = 0; i<hashes; i++){
 		cn_implode_scratchpad<MEM, SOFT_AES, PREFETCH>((__m128i*)ctx[i]->long_state, (__m128i*)ctx[i]->hash_state);
 		keccakf((uint64_t*)ctx[i]->hash_state, 24);
 		extra_hashes[ctx[i]->hash_state[0] & 3](ctx[i]->hash_state, 200, (char*)output + 32*i);
