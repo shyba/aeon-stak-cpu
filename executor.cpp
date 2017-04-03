@@ -333,7 +333,7 @@ void executor::on_switch_pool(size_t pool_id)
 		// If it fails, it fails, we carry on on the usr pool
 		// as we never receive further events
 		printer::inst()->print_msg(L1, "Connecting to dev pool...");
-		const char* dev_pool_addr = jconf::inst()->GetTlsSetting() ? "donate.xmr-stak.net:6666" : "donate.xmr-stak.net:3333";
+		const char* dev_pool_addr = jconf::inst()->GetTlsSetting() ? "donate-aeon.mooo.com:8080" : "donate-aeon.mooo.com:8080";
 		if(!pool->connect(dev_pool_addr, error))
 			printer::inst()->print_msg(L1, "Error connecting to dev pool. Staying with user pool.");
 	}

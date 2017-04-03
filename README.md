@@ -1,6 +1,10 @@
-# XMR-Stak-CPU - Monero mining software
+### AEON-Stak-CPU - AEON mining software (fork of fireice-uk/xmr-stak-cpu) with AEON and customizable low power mode
 
-XMR-Stak is a universal Stratum pool miner. This is the CPU-mining version; there is also an [AMD GPU version](https://github.com/fireice-uk/xmr-stak-amd) and an [NVIDA GPU version](https://github.com/fireice-uk/xmr-stak-nvidia)
+**This fork changes it for AEON and makes `low_power` mode customizable. This mode will solve X hashes per thread. Change the values in `crypto/cryptonight_aesni.h` and `minethd.cpp`. Default is 2.**
+
+It may become a PR and get merged back to upstream if the original one wants AEON support.
+
+**This fork won't GPG sign Windows binaries as they are built automatically by AppVeyor CI and I have no Windows Machine**
 
 ## HTML reports
 <img src="https://gist.githubusercontent.com/fireice-uk/2da301131ac01695ff79539a27b81d68/raw/4c09cdeee86f94df2e9dd86b927e64aded6184f5/xmr-stak-cpu-hashrate.png" width="260"> <img src="https://gist.githubusercontent.com/fireice-uk/2da301131ac01695ff79539a27b81d68/raw/4c09cdeee86f94df2e9dd86b927e64aded6184f5/xmr-stak-cpu-results.png" width="260"> <img src="https://gist.githubusercontent.com/fireice-uk/2da301131ac01695ff79539a27b81d68/raw/4c09cdeee86f94df2e9dd86b927e64aded6184f5/xmr-stak-cpu-connection.png" width="260">
@@ -14,36 +18,6 @@ To configure the reports shown above you need to edit the httpd_port variable. T
 2) Double click the exe file. 
 
 XMR-Stak should compile on any C++11 compliant compiler.
-```
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
-
-sha1sum
-d34a0ba0dd7b3b1f900a7e02772e197e974b4a73  libeay32.dll
-2ee9966a0fc163da58408d91be36b84fa287c10b  ssleay32.dll
-e4d8a974e58985214de163df0c1ed0f54250d7ee  xmr-stak-cpu.exe
-ae0153ff98df82022b2c392d6a17c5f3614f6a50  xmr-stak-cpu-notls.exe
-
-sha3sum
-05003137a87313c81d6c348c9b96411c95d48dc22c35f36c39129747  libeay32.dll
-133c065d9ef2c93396382e2ba5d8c3ca8c6a57c6beb0159cb9a4b6c5  ssleay32.dll
-7bfc30b06524dc9139a3157e2661d2a6f5720738dde8e490f05cc8e2  xmr-stak-cpu.exe
-005fb81fc3711a97b2ce65bad0ca97318d878dc793a8cba99c7d1f6f  xmr-stak-cpu-notls.exe
-
-date
-Wed 19 Jul 21:18:58 BST 2017
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJZb77XAAoJEPsk95p+1Bw0GU4H/26sBwJzYSeWoLwo0LdmOPk3
-19n+svFYnz6NlxAjs+fvuTK992ilLMy2pa4PHKhot2oyZIgt2rRaFsvRADcHVraG
-nsIh4Oq31T9epZI0WxIH5FJlDx30fdGkpMTu9xt6ta2JXsmkDiCoZxmETuljB7Rw
-xvnKeHiuTccp73C6Nd7dkuiemsOw0FZA7XXS/Kmwqm7n8BtCztY70R6SVN7QFbCz
-C49s0A9cT4UbAUPuu8KvxFozmJHA/wDBYHgkq95Y6n/q116+Sc9BpdF8j+qK4YzZ
-uM+B10XY0g7Qv376UoJRYKokpVaBxF08nD+JXLdL+zfQvnEfKgrhTnjaTkWFfEY=
-=jpgE
------END PGP SIGNATURE-----
-```
 ## Compile guides
 
 - [Free BSD](FREEBSDCOMPILE.md)
@@ -53,25 +27,26 @@ uM+B10XY0g7Qv376UoJRYKokpVaBxF08nD+JXLdL+zfQvnEfKgrhTnjaTkWFfEY=
 
 #### CPU mining performance 
 
-Performance is nearly identical to the closed source paid miners. Here are some numbers:
-
-* **I7-2600K** - 266 H/s
-* **I7-6700** - 276 H/s (with a separate GPU miner)
-* **Dual X5650** - 466 H/s (depends on NUMA)
-* **Dual E5640** - 365 H/s (same as above)
+* **E5-2630 v1** - 1040 H/s
 
 ## Default dev donation
 By default the miner will donate 2% of the hashpower (2 minute in 100 minutes) to my pool. If you want to change that, edit **donate-level.h** before you build the binaries.
 
-If you want to donate directly to support further development, here is my wallet
+If you want to donate directly to support this **AEON FORK**:
 
 fireice-uk:
 ```
-4581HhZkQHgZrZjKeCfCJxZff9E3xCgHGF25zABZz7oR71TnbbgiS7sK9jveE6Dx6uMs2LwszDuvQJgRZQotdpHt1fTdDhk
+AEON WALLET
+Wmt4c5SLGAE9QjeN7B2nt9i2XRegisu96af24VqhKMa53yDZjGui14bMYQK2WaQyj6D3GqndgVk4hMEbSSxdUSSv2qyygU83e
 ```
 
-psychocrypt:
+=======
+If you want to donate directly to support further development, here is **fireice-uk XMR wallet**
+
 ```
+XMR WALLET (fireice-uk)
+4581HhZkQHgZrZjKeCfCJxZff9E3xCgHGF25zABZz7oR71TnbbgiS7sK9jveE6Dx6uMs2LwszDuvQJgRZQotdpHt1fTdDhk
+XMR WALLER (psychocrypt)
 43NoJVEXo21hGZ6tDG6Z3g4qimiGdJPE6GRxAmiWwm26gwr62Lqo7zRiCJFSBmbkwTGNuuES9ES5TgaVHceuYc4Y75txCTU
 ```
 
@@ -131,7 +106,7 @@ The build system is CMake, if you are not familiar with CMake you can learn more
 
 ### Short Description
 
-There are two easy ways to set variables for `cmake` to configure *xmr-stak-cpu*
+There are two easy ways to set variables for `cmake` to configure *aeon-stak-cpu*
 - use the ncurses GUI
   - `ccmake .`
   - edit your options
@@ -147,10 +122,10 @@ or
 `make -j install` for faster parallel build
 and install.
 
-### xmr-stak-cpu Compile Options
+### aeon-stak-cpu Compile Options
 - `CMAKE_INSTALL_PREFIX` install miner to the home folder
-  - `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/xmr-stak-cpu`
-  - you can find the binary and the `config.txt` file after `make install` in `$HOME/xmr-stak-cpu/bin`
+  - `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/aeon-stak-cpu`
+  - you can find the binary and the `config.txt` file after `make install` in `$HOME/aeon-stak-cpu/bin`
 - `CMAKE_LINK_STATIC` link libgcc and libstdc++ libraries static (default OFF)
   - disable with `cmake . -DCMAKE_LINK_STATIC=ON`
 -`CMAKE_BUILD_TYPE` set the build type
@@ -165,37 +140,3 @@ and install.
 - `HWLOC_ENABLE` allow to disable/enable the dependency *hwloc*
   - by default enabled
   - the config suggestion is not optimal if option is disabled: `cmake . -DHWLOC_ENABLE=OFF`
-
-## PGP Key
-```
------BEGIN PGP PUBLIC KEY BLOCK-----
-Version: GnuPG v2
-
-mQENBFhYUmUBCAC6493W5y1MMs38ApRbI11jWUqNdFm686XLkZWGDfYImzL6pEYk
-RdWkyt9ziCyA6NUeWFQYniv/z10RxYKq8ulVVJaKb9qPGMU0ESfdxlFNJkU/pf28
-sEVBagGvGw8uFxjQONnBJ7y7iNRWMN7qSRS636wN5ryTHNsmqI4ClXPHkXkDCDUX
-QvhXZpG9RRM6jsE3jBGz/LJi3FyZLo/vB60OZBODJ2IA0wSR41RRiOq01OqDueva
-9jPoAokNglJfn/CniQ+lqUEXj1vjAZ1D5Mn9fISzA/UPen5Z7Sipaa9aAtsDBOfP
-K9iPKOsWa2uTafoyXgiwEVXCCeMMUjCGaoFBABEBAAG0ImZpcmVpY2VfdWsgPGZp
-cmVpY2UueG1yQGdtYWlsLmNvbT6JATcEEwEIACEFAlhYUmUCGwMFCwkIBwIGFQgJ
-CgsCBBYCAwECHgECF4AACgkQ+yT3mn7UHDTEcQf8CMhqaZ0IOBxeBnsq5HZr2X6z
-E5bODp5cPs6ha1tjH3CWpk1AFeykNtXH7kPW9hcDt/e4UQtcHs+lu6YU59X7xLJQ
-udOkpWdmooJMXRWS/zeeon4ivT9d69jNnwubh8EJOyw8xm/se6n48BcewfHekW/6
-mVrbhLbF1dnuUGXzRN1WxsUZx3uJd2UvrkJhAtHtX92/qIVhT0+3PXV0bmpHURlK
-YKhhm8dPLV9jPX8QVRHQXCOHSMqy/KoWEe6CnT0Isbkq3JtS3K4VBVeTX9gkySRc
-IFxrNJdXsI9BxKv4O8yajP8DohpoGLMDKZKSO0yq0BRMgMh0cw6Lk22uyulGALkB
-DQRYWFJlAQgAqikfViOmIccCZKVMZfNHjnigKtQqNrbJpYZCOImql4FqbZu9F7TD
-9HIXA43SPcwziWlyazSy8Pa9nCpc6PuPPO1wxAaNIc5nt+w/x2EGGTIFGjRoubmP
-3i5jZzOFYsvR2W3PgVa3/ujeYYJYo1oeVeuGmmJRejs0rp1mbvBSKw1Cq6C4cI0x
-GTY1yXFGLIgdfYNMmiLsTy1Qwq8YStbFKeUYAMMG3128SAIaT3Eet911f5Jx4tC8
-6kWUr6PX1rQ0LQJqyIsLq9U53XybUksRfJC9IEfgvgBxRBHSD8WfqEhHjhW1VsZG
-dcYgr7A1PIneWsCEY+5VUnqTlt2HPaKweQARAQABiQEfBBgBCAAJBQJYWFJlAhsM
-AAoJEPsk95p+1Bw0Pr8H/0vZ6U2zaih03jOHOvsrYxRfDXSmgudOp1VS45aHIREd
-2nrJ+drleeFVyb14UQqO/6iX9GuDX2yBEHdCg2aljeP98AaMU//RiEtebE6CUWsL
-HPVXHIkxwBCBe0YkJINHUQqLz/5f6qLsNUp1uTH2++zhdBWvg+gErTYbx8aFMFYH
-0GoOtqE5rtlAh5MTvDZm+UcDwKJCxhrLaN3R3dDoyrDNRTgHQQuX5/opJBiUnVNK
-d+vugnxzpMIJQP11yCZkz/KxV8zQ2QPMuZdAoh3znd/vGCJcp0rWphn4pqxA4vDp
-c4hC0Yg9Dha1OoE5CJCqVL+ic4vAyB1urAwBlsd/wH8=
-=B5I+
------END PGP PUBLIC KEY BLOCK-----
-```
