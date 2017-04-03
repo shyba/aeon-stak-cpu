@@ -1,4 +1,5 @@
 ### AEON-Stak-CPU - AEON mining software (fork of fireice-uk/xmr-stak-cpu) with AEON and customizable low power mode
+[![Build status](https://ci.appveyor.com/api/projects/status/6vrjywu9nsuphf7i/branch/master?svg=true)](https://ci.appveyor.com/project/shyba/xmr-stak-cpu/branch/master)
 
 **This fork changes it for AEON and makes `low_power` mode customizable. This mode will solve X hashes per thread. Change the values in `crypto/cryptonight_aesni.h` and `minethd.cpp`. Default is 2.**
 
