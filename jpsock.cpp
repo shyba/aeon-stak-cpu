@@ -34,7 +34,7 @@
 #include "socket.h"
 #include "version.h"
 
-#define AGENTID_STR XMR_STAK_NAME "/" XMR_STAK_VERSION
+#define AGENTID_STR "aeon-stak-cpu/" AEON_STAK_VERSION
 
 using namespace rapidjson;
 

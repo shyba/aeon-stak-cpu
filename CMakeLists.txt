@@ -1,4 +1,4 @@
-project(xmr-stak-cpu)
+project(aeon-stak-cpu)
 
 cmake_minimum_required(VERSION 3.0.1)
 
@@ -164,19 +164,19 @@ endif()
 file(GLOB SRCFILES_CPP "*.cpp" "crypto/*.cpp")
 file(GLOB SRCFILES_C "crypto/*.c")
 
-add_library(xmr-stak-c
+add_library(aeon-stak-c
     STATIC
     ${SRCFILES_C}
 )
-set_property(TARGET xmr-stak-c PROPERTY C_STANDARD 99)
-target_link_libraries(xmr-stak-c ${LIBS})
+set_property(TARGET aeon-stak-c PROPERTY C_STANDARD 99)
+target_link_libraries(aeon-stak-c ${LIBS})
 
-add_executable(xmr-stak-cpu
+add_executable(aeon-stak-cpu
     ${SRCFILES_CPP}
 )
 
 set(EXECUTABLE_OUTPUT_PATH "bin")
-target_link_libraries(xmr-stak-cpu ${LIBS} xmr-stak-c)
+target_link_libraries(aeon-stak-cpu ${LIBS} aeon-stak-c)
 
 ################################################################################
 # Install
@@ -184,10 +184,9 @@ target_link_libraries(xmr-stak-cpu ${LIBS} xmr-stak-c)
 
 # do not install the binary if the project and install are equal
 if( NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "${PROJECT_BINARY_DIR}" )
-    install(TARGETS xmr-stak-cpu
+    install(TARGETS aeon-stak-cpu
             RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 endif()
-
 
 # avoid overwrite of user defined settings
 # install `config.txt`if file not exists in `${CMAKE_INSTALL_PREFIX}/bin`

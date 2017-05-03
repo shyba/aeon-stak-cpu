@@ -142,11 +142,12 @@ int main(int argc, char *argv[])
 #endif
 
 	printer::inst()->print_str("-------------------------------------------------------------------\n");
-	printer::inst()->print_str( XMR_STAK_NAME" " XMR_STAK_VERSION " mining software, CPU Version.\n");
-	printer::inst()->print_str("Based on CPU mining code by wolf9466 (heavily optimized by fireice_uk).\n");
-	printer::inst()->print_str("Brought to you by fireice_uk and psychocrypt under GPLv3.\n\n");
+	printer::inst()->print_str("AEON-Stak-CPU mining software, CPU Version.\n");
+	printer::inst()->print_str("Based on CPU mining code by wolf9466 (heavily optimized by fireice_uk and psychocrypt).\n");
+	printer::inst()->print_str("Monero upstream by fireice_uk and psychocrypt, under GPLv3.\n\n");
+	printer::inst()->print_str("Aeon fork of xmr-stak-cpu maintained by shyba, also under GPLv3.\n\n");
 	char buffer[64];
-	snprintf(buffer, sizeof(buffer), "Configurable dev donation level is set to %.1f %%\n\n", fDevDonationLevel * 100.0);
+	snprintf(buffer, sizeof(buffer), "Configurable donation level is set to %.1f %%\n\n", fDevDonationLevel * 100.0);
 	printer::inst()->print_str(buffer);
 	printer::inst()->print_str("You can use following keys to display reports:\n");
 	printer::inst()->print_str("'h' - hashrate\n");
