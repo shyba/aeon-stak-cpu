@@ -5,24 +5,33 @@ image: Visual Studio 2017
 platform: x64
 
 # clone directory
-clone_folder: c:\xmr-stak-cpu
+clone_folder: c:\aeon-stak-cpu
 
 install:
-  - mkdir c:\xmr-stak-dep
-  - curl -sL https://github.com/fireice-uk/xmr-stak-dep/releases/download/v1/xmr-stak-dep.zip -o xmr-stak-dep.zip
-  - 7z x xmr-stak-dep.zip -o"c:\xmr-stak-dep" -y > nul
+  - mkdir c:\aeon-stak-dep
+  - curl -sL https://github.com/fireice-uk/xmr-stak-dep/releases/download/v1/xmr-stak-dep.zip -o aeon-stak-dep.zip
+  - 7z x aeon-stak-dep.zip -o"c:\aeon-stak-dep" -y > nul
 
 build_script:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsMSBuildCmd.bat"
-  - cd c:\xmr-stak-cpu
+  - cd c:\aeon-stak-cpu
   - mkdir build
   - cd build
-  - set CMAKE_PREFIX_PATH=C:\xmr-stak-dep\hwloc;C:\xmr-stak-dep\libmicrohttpd;C:\xmr-stak-dep\openssl;
+  - set CMAKE_PREFIX_PATH=C:\aeon-stak-dep\hwloc;C:\aeon-stak-dep\libmicrohttpd;C:\aeon-stak-dep\openssl;
   - cmake -G "Visual Studio 15 2017 Win64" -T v141,host=x64 ..
-  - msbuild xmr-stak-cpu.sln /p:Configuration=Release
+  - msbuild aeon-stak-cpu.sln /p:Configuration=Release
 
 test_script:
-  - cd c:\xmr-stak-cpu\build\bin\Release
+  - cd c:\aeon-stak-cpu\build\bin\Release
   - dir
   - copy ..\..\..\config.txt .
-#  - xmr-stak-cpu.exe
+  - cd c:\aeon-stak-cpu
+#  - aeon-stak-cpu.exe
+
+after_build:
+  - cd c:\aeon-stak-cpu
+  - cmd: 7z a aeon-stak-cpu.zip C:\aeon-stak-cpu\build\bin\Release\aeon-stak-cpu.exe C:\aeon-stak-cpu\config.txt C:/OpenSSL-Win32/*.dll
+
+artifacts:
+  - path: aeon-stak-cpu.zip
+  - path: aeon-stak-cpu-source.zip
