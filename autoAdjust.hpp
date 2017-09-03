@@ -64,7 +64,7 @@ public:
 			if(L3KB_size <= 0)
 				break;
 
-			double_mode = L3KB_size / 2048 > (int32_t)(corecnt-i);
+			double_mode = L3KB_size / 1024 > (int32_t)(corecnt-i);
 
 			snprintf(strbuf, sizeof(strbuf), "   { \"low_power_mode\" : %s, \"no_prefetch\" : true, \"affine_to_cpu\" : %u },\n",
 				double_mode ? "true" : "false", aff_id);
@@ -81,9 +81,9 @@ public:
 				aff_id++;
 
 			if(double_mode)
-				L3KB_size -= 4096;
-			else
 				L3KB_size -= 2048;
+			else
+				L3KB_size -= 1024;
 		}
 
 		printer::inst()->print_str("],\n\n**************** Copy&Paste END ****************\n");
